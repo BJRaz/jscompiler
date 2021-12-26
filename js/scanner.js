@@ -3,8 +3,10 @@ var types = require("./types");
 function scan(exp) {
     let tokens = [];
     var i = 0;
+    exp = exp.replace(/\s/g, '');
     let c = exp[i];
-    // remember to remove whitespace
+    // remember to remove whitespace    
+    
     while(c != undefined) {
         
         switch(c) {

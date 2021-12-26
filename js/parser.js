@@ -1,5 +1,6 @@
 var types = require("./types");
 var scanner = require("./scanner");
+const { tTokens } = require("./types");
 
 // statement 	:= 	exp 
 // exp			:= 	factor operator factor
@@ -28,35 +29,45 @@ function exp() {
 }
 
 function factor() {
-	if(currentToken().token() == 1)
-	stack.push(currentToken().getValue());
-	console.log("'" + currentToken().getValue() + "'" + " type: " + currentToken().token() + " ");
+	console.log("Factor: " + currentToken().toString());
+
+	if(currentToken().token() == tTokens.NUMBER) {
+		stack.push(currentToken().getValue());
+		
+	}
+		
 	nextToken();
-	if(currentToken().token() == types.tTokens.PARASTART)
+	if(next != undefined) {
+		console.log('Next token: ' + next.toString())
+		if(currentToken().token() == types.tTokens.PARASTART)
 		{
 			advance();
 			exp();
 		}
-	advance();
+		advance();	
+	}
+	
 }
 
 function operator() {
-	var tokenValue = currentToken();
+	var token = currentToken();
 	
 	advance();
 	factor();
 		
-	switch(tokenValue.getValue())
+	switch(token.getValue())
 	{
 		case '+':
 			console.log("PLUS");
-			var num = stack.pop();
-			stack.push(stack.pop() + num);
+			var op2 = parseFloat(stack.pop());
+			var op1 = parseFloat(stack.pop());
+			stack.push(op1 + op2);
 			break;
 		case '-':
 			console.log("MINUS");
-			var num = stack.pop();
-			stack.push(stack.pop() - num);
+			var op2 = stack.pop();
+			var op1 = stack.pop();
+			stack.push(op1 - op2);
 			break;
 		case '*':
 			console.log("MULTIPLY");
@@ -68,7 +79,7 @@ function operator() {
 			stack.push(stack.pop() / divisor);
 			break;
 		default:
-			throw new Error("Unknown operator " + tokenValue.token());
+			throw new Error("Unknown operator " + token.token());
 	}
 	
 }
@@ -102,7 +113,7 @@ function parseAndEvaluate(expression) {
 
 
 	statement();
-	console.log(stack.pop());
+	return (stack.pop());
 	
 }
 

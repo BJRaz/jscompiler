@@ -17,6 +17,10 @@ class Token
 	getValue() {
 		return this.value;
 	}	
+
+    toString() {
+        return ("'" + this.getValue() + "'" + " type: " + this.token() + " ").toString()
+    }
 };
 
 module.exports = {
