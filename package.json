@@ -1,0 +1,19 @@
+{
+  "name": "compilers",
+  "version": "1.0.0",
+  "description": "This is a small project for experimenting scanners, parsers, compilers, languages etc made in javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "scanner",
+    "parser",
+    "compiler"
+  ],
+  "author": "Brian J Rasmussen",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^27.4.5"
+  }
+}

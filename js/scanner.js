@@ -1,3 +1,5 @@
+var types = require("./types");
+
 function scan(exp) {
     let tokens = [];
     var i = 0;
@@ -30,7 +32,7 @@ function scan(exp) {
                                 }
                         }	
                     }
-                    tokens[tokens.length] = new Token(tTokens.NUMBER, numbers.join(''));
+                    tokens[tokens.length] = new types.Token(types.tTokens.NUMBER, numbers.join(''));
                     break;
                 }
             case '+':
@@ -68,9 +70,9 @@ function scan(exp) {
                                     }
                             }	
                         }
-                        tokens.push(new Token(tTokens.NUMBER, chars.join(''))); 
+                        tokens.push(new types.Token(types.tTokens.NUMBER, chars.join(''))); 
                     } else {
-                        tokens.push(new Token(tTokens.OPERATOR, c)); 
+                        tokens.push(new types.Token(types.tTokens.OPERATOR, c)); 
                         c = exp[++i];
                     }
                     
@@ -79,14 +81,14 @@ function scan(exp) {
             case '(':
                 {
                    
-                    tokens.push(new Token(tTokens.PARASTART, c)); 
+                    tokens.push(new types.Token(types.tTokens.PARASTART, c)); 
                     c = exp[++i];
                     break;
                 } 
             case ')':
                 {
                     
-                    tokens.push(new Token(tTokens.PARAEND, c)); 
+                    tokens.push(new types.Token(types.tTokens.PARAEND, c)); 
                     c = exp[++i];
                     break;
                 }
@@ -96,3 +98,5 @@ function scan(exp) {
     }
     return tokens;
 }
+
+module.exports = { scan: scan }
