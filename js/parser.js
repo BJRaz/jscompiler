@@ -2,34 +2,51 @@ var types = require("./types");
 var scanner = require("./scanner");
 const { tTokens } = require("./types");
 
-// statement 	:= 	exp 
-// exp			:= 	factor operator factor
-// factor		:=	( exp ) | NUMBER
-// operator		:=  + | - | * | /
+// statement 	::= 	exp 
+// exp			::= 	factor operator factor
+// factor		::=		( exp ) | NUMBER
+// operator		::=  	+ | - | * | /
+// NUMBER		::= 	[0-9]
 
-
-var debth = 0;
 var stack = [];
 
 var tokenlist = [];
 
-var currenttoken = null;
 var currentindex = 0;
 var next = null;
+var level = 0;
 
+function repeat(i) {
+	return Array(i + 1).join(' ');
+}
 
+function printDebug(str) {
+	console.log(`${repeat(level * 4)} ${str}`);
+}
+
+function init() {
+	stack = [];
+	tokenlist = [];
+	currentindex = 0;
+	next = null;
+}
 
 function statement() {
+	printDebug(level);
 	exp();
+	printDebug(level);
 }
 
 function exp() {
+	level++;
+	printDebug(level);
 	factor();
 	operator();
+	level--;
 }
 
 function factor() {
-	console.log("Factor: " + currentToken().toString());
+	printDebug("Factor: " + currentToken().toString());
 
 	if(currentToken().token() == tTokens.NUMBER) {
 		stack.push(currentToken().getValue());
@@ -38,7 +55,7 @@ function factor() {
 		
 	nextToken();
 	if(next != undefined) {
-		console.log('Next token: ' + next.toString())
+		//printDebug('Next token: ' + next.toString())
 		if(currentToken().token() == types.tTokens.PARASTART)
 		{
 			advance();
@@ -51,30 +68,32 @@ function factor() {
 
 function operator() {
 	var token = currentToken();
-	
+	printDebug("Operator: " + token);
 	advance();
 	factor();
 		
+	printDebug("Stack PRE operator: " + stack);
+
 	switch(token.getValue())
 	{
 		case '+':
-			console.log("PLUS");
+			//printDebug("PLUS");
 			var op2 = parseFloat(stack.pop());
 			var op1 = parseFloat(stack.pop());
 			stack.push(op1 + op2);
 			break;
 		case '-':
-			console.log("MINUS");
+			//printDebug("MINUS");
 			var op2 = stack.pop();
 			var op1 = stack.pop();
 			stack.push(op1 - op2);
 			break;
 		case '*':
-			console.log("MULTIPLY");
+			//printDebug("MULTIPLY");
 			stack.push(stack.pop() * stack.pop());
 			break;
 		case '/':
-			console.log("DIVISION");
+			//printDebug("DIVISION");
 			var divisor = stack.pop();
 			stack.push(stack.pop() / divisor);
 			break;
@@ -82,6 +101,7 @@ function operator() {
 			throw new Error("Unknown operator " + token.token());
 	}
 	
+	printDebug("Stack POST operator: " + stack);
 }
 
 // *******
@@ -102,7 +122,7 @@ function currentToken() {
 
 
 function parseAndEvaluate(expression) {
-	
+	init();
 	tokenlist = scanner.scan(expression);
 	let str = [];
 	for(var i in tokenlist)
