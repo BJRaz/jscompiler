@@ -1,12 +1,12 @@
-var types = require("./types");
-var scanner = require("./scanner");
+const types = require("./types");
+const scanner = require("./scanner");
 const { tTokens } = require("./types");
 
 // statement 	::= 	exp 
 // exp			::= 	factor operator factor
 // factor		::=		( exp ) | NUMBER
 // operator		::=  	+ | - | * | /
-// NUMBER		::= 	[0-9]
+// NUMBER		::= 	...
 
 var stack = [];
 
@@ -52,15 +52,17 @@ function factor() {
 		stack.push(currentToken().getValue());
 		
 	}
-		
+	if(currentToken().token() == types.tTokens.PARASTART)
+	{
+		advance();
+		exp();
+		if(currentToken().token() != types.tTokens.PARAEND)
+			throw new Error('Unmatched "("');
+	}	
 	nextToken();
 	if(next != undefined) {
-		//printDebug('Next token: ' + next.toString())
-		if(currentToken().token() == types.tTokens.PARASTART)
-		{
-			advance();
-			exp();
-		}
+		printDebug('Next token: ' + next.toString())
+		
 		advance();	
 	}
 	
@@ -69,7 +71,19 @@ function factor() {
 function operator() {
 	var token = currentToken();
 	printDebug("Operator: " + token);
+	
 	advance();
+	if(currentToken().token() == types.tTokens.NUMBER)
+	{
+		nextToken();
+		if(next != undefined) {
+			printDebug('Next token: ' + next.toString())
+			if(next.tokentype != types.tTokens.PARAEND)
+				throw new Error('Unexpected token ' + next);
+			//advance();	
+		}
+	}
+	
 	factor();
 		
 	printDebug("Stack PRE operator: " + stack);
@@ -102,6 +116,7 @@ function operator() {
 	}
 	
 	printDebug("Stack POST operator: " + stack);
+	
 }
 
 // *******

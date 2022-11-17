@@ -73,11 +73,11 @@ test('parse and evaluate (2*2)-1', () => {
     expect(result).toBe(3);
 });
 
-// test('parse and evaluate 2*2-1', () => {
-//     let result = parser.parse("2*2-1");
-    
-//     expect(result).toBe(3);
-// });
+test('parse and evaluate 2*2-1', () => {
+    expect(() => {
+        parser.parse("2*2-1")
+    }).toThrow("Unexpected token '-' type: 2");
+});
 
 test('parse and evaluate 2*(2-1)', () => {
     let result = parser.parse("2*(2-1)");
