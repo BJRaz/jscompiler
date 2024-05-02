@@ -1,6 +1,13 @@
 var types = require("./types");
+var debug = false;
 
-function scan(exp) {
+function printDebug(str) {
+	if(debug)
+		console.log(`${repeat(level * 4)} ${str}`);
+}
+
+function scan(exp, setdebug = false) {
+    debug = setdebug;
     let tokens = [];
     var i = 0;
     exp = exp.replace(/\s/g, '');
@@ -8,12 +15,12 @@ function scan(exp) {
     // remember to remove whitespace    
     
     while(c != undefined) {
-        
         switch(c) {
             case '0': case '1': case '2': case '3': case '4':
-            case '5': case '6': case '7': case '8': case '9':
+            case '5': case '6': case '7': case '8': case '9': case '.':
                 {
                     let numbers = [];
+                    let hasdot = c === '.';
                     numbers.push(c);
                     // numeral
                     let done = false;
@@ -24,7 +31,14 @@ function scan(exp) {
                             case '5': case '6': case '7': case '8': case '9':
                                 {
                                     numbers.push(c);
-                                    
+                                    break;
+                                }
+                            case '.':
+                                {
+                                    if(hasdot)
+                                        throw new Error("Unaccepted character: '" + c + "', at index: " + i);
+                                    hasdot = !hasdot;
+                                    numbers.push(c);
                                     break;
                                 }
                             default:
@@ -34,7 +48,7 @@ function scan(exp) {
                                 }
                         }	
                     }
-                    tokens[tokens.length] = new types.Token(types.tTokens.NUMBER, numbers.join(''));
+                    tokens.push(new types.Token(types.tTokens.NUMBER, numbers.join('')));
                     break;
                 }
             case '+':
@@ -49,7 +63,7 @@ function scan(exp) {
                         || prev == '/' 
                         || prev == '*' 
                         || prev == '(') {
-                        console.log("Operator is unary");
+                        printDebug("Operator is unary");
 
                         let chars = [];
                         chars.push(c);    // push the operator
@@ -95,7 +109,7 @@ function scan(exp) {
                     break;
                 }
             default:
-                throw new Error("Unknown character: " + c + ", at index: " + i);
+                throw new Error("Unaccepted character: '" + c + "', at index: " + i + " " + exp[i]);
         }
     }
     return tokens;
