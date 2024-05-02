@@ -3,25 +3,25 @@ var debug = false;
 
 function printDebug(str) {
 	if(debug)
-		console.log(`${repeat(level * 4)} ${str}`);
+		console.log(str);
 }
 
 function scan(exp, setdebug = false) {
     debug = setdebug;
     let tokens = [];
-    var i = 0;
-    exp = exp.replace(/\s/g, '');
-    let c = exp[i];
-    // remember to remove whitespace    
+    let i = 0;
+    exp = exp.replace(/\s/g, '');   // remove whitespace from expression   
+    let c = exp[i];                 // gets the first character from expression
     
-    while(c != undefined) {
+    let numberchars = [];
+    while(c) {
         switch(c) {
             case '0': case '1': case '2': case '3': case '4':
-            case '5': case '6': case '7': case '8': case '9': case '.':
+            case '5': case '6': case '7': case '8': case '9': 
+            case '.':
                 {
-                    let numbers = [];
                     let hasdot = c === '.';
-                    numbers.push(c);
+                    numberchars.push(c);
                     // numeral
                     let done = false;
                     while(!done) {
@@ -30,7 +30,7 @@ function scan(exp, setdebug = false) {
                             case '0': case '1': case '2': case '3': case '4':
                             case '5': case '6': case '7': case '8': case '9':
                                 {
-                                    numbers.push(c);
+                                    numberchars.push(c);
                                     break;
                                 }
                             case '.':
@@ -38,7 +38,7 @@ function scan(exp, setdebug = false) {
                                     if(hasdot)
                                         throw new Error("Unaccepted character: '" + c + "', at index: " + i);
                                     hasdot = !hasdot;
-                                    numbers.push(c);
+                                    numberchars.push(c);
                                     break;
                                 }
                             default:
@@ -48,8 +48,9 @@ function scan(exp, setdebug = false) {
                                 }
                         }	
                     }
-                    tokens.push(new types.Token(types.tTokens.NUMBER, numbers.join('')));
-                    break;
+                    tokens.push(new types.Token(types.tTokens.NUMBER, numberchars.join('')));
+                    numberchars = [];   // clear the array
+                    continue;           
                 }
             case '+':
             case '-':
@@ -63,54 +64,63 @@ function scan(exp, setdebug = false) {
                         || prev == '/' 
                         || prev == '*' 
                         || prev == '(') {
-                        printDebug("Operator is unary");
+                        
+                        printDebug("[" + c + 
+                            "] operator is unary");
 
-                        let chars = [];
-                        chars.push(c);    // push the operator
-                        // numeral
-                        let done = false;
-                        while(!done) {
-                            c = exp[++i];
-                            switch(c) {
-                                case '0': case '1': case '2': case '3': case '4':
-                                case '5': case '6': case '7': case '8': case '9':
-                                    {
-                                        chars.push(c);
-                                        
-                                        break;
-                                    }
-                                default:
-                                    {
-                                        done = true;
-                                        break;
-                                    }
-                            }	
-                        }
-                        tokens.push(new types.Token(types.tTokens.NUMBER, chars.join(''))); 
+                        // let chars = [];
+                        // chars.push(c);    
+
+                        numberchars.push(c);    // push the operator to the numbers array
+
+                        // c = exp[++i];
+                        // // numeral
+                        // let done = false;
+                        // let hasdot = c === '.';
+                        // while(!done) {
+                        //     c = exp[++i];
+                        //     switch(c) {
+                        //         case '0': case '1': case '2': case '3': case '4':
+                        //         case '5': case '6': case '7': case '8': case '9':
+                        //             {
+                        //                 chars.push(c);
+                        //                 break;
+                        //             }
+                        //         case ".":
+                        //             {
+                        //                 if(hasdot)
+                        //                     throw new Error("Unaccepted character: '" + c + "', at index: " + i);
+                        //                 hasdot = !hasdot;
+                        //                 chars.push(c);
+                        //                 break;
+                        //             }
+                        //         default:
+                        //             {
+                        //                 done = true;
+                        //                 break;
+                        //             }
+                        //     }	
+                        // }
+                        // tokens.push(new types.Token(types.tTokens.NUMBER, chars.join(''))); 
                     } else {
                         tokens.push(new types.Token(types.tTokens.OPERATOR, c)); 
-                        c = exp[++i];
                     }
-                    
                     break;
                 }					
             case '(':
                 {
-                   
                     tokens.push(new types.Token(types.tTokens.PARASTART, c)); 
-                    c = exp[++i];
                     break;
                 } 
             case ')':
                 {
-                    
                     tokens.push(new types.Token(types.tTokens.PARAEND, c)); 
-                    c = exp[++i];
                     break;
                 }
             default:
                 throw new Error("Unaccepted character: '" + c + "', at index: " + i + " " + exp[i]);
         }
+        c = exp[++i];
     }
     return tokens;
 }

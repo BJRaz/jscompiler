@@ -34,3 +34,11 @@ test('parse and evaluate 2*2-1', () => {
 test('parse and evaluate 2*(2-1)', () => {
     expect(parser.parse("2*(2-1)")).toBe(2);
 });
+
+test('parse and evaluate 2+(-10.5-4)', () => {
+    expect(parser.parse("2+(-10.5-4)")).toBe(-12.5);
+});
+
+test('parse and evaluate 2+(-.5-4)', () => {
+    expect(parser.parse("2+(-.5-4)")).toBe(-2.5);
+});
