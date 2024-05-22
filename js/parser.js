@@ -2,11 +2,13 @@ const types = require("./types");
 const scanner = require("./scanner");
 const { tTokens } = require("./types");
 
+// This is faulty notation for some productions.
+// 
 // statement 	::= 	exp 
 // exp			::= 	factor operator factor
 // factor		::=		( exp ) | NUMBER
 // operator		::=  	+ | - | * | /
-// NUMBER		::= 	...
+// NUMBER		::= 	0...9
 
 var stack = [];
 
@@ -43,6 +45,7 @@ function exp() {
 	printDebug(level);
 	factor();
 	operator();
+	
 	level--;
 }
 
@@ -75,16 +78,29 @@ function operator() {
 	
 	advance();
 
-	if(currentToken().token() == types.tTokens.NUMBER)
-	{
-		let nexttoken = peekNextToken();
-		if(nexttoken != undefined) {
-			printDebug('Next token: ' + nexttoken.toString())
-			if(nexttoken.tokentype != types.tTokens.PARAEND)
-				throw new Error('Unexpected token ' + nexttoken);
-			//advance();	
-		}
-	}
+	let lastindex = currentindex;
+
+	// if(currentToken().token() == types.tTokens.NUMBER)
+	// {
+	// 	let nexttoken = peekNextToken();
+	// 	if(nexttoken != undefined) {
+	// 		printDebug('Next token: ' + nexttoken.toString())
+	// 		if(nexttoken.tokentype == types.tTokens.OPERATOR)
+	// 		{
+	// 				if(nexttoken.getValue() == '*' || nexttoken.getValue() == '/')
+	// 					{
+	// 						exp();
+	// 						console.log('where am I?');
+	// 						let hest = tokenbuffer.splice(lastindex, 3, new types.Token(types.tTokens.NUMBER, stack.pop()));
+	// 						console.log(hest);
+	// 						currentindex = lastindex;
+	// 					}
+	// 		}
+	// 		else if(nexttoken.tokentype != types.tTokens.PARAEND)
+	// 			throw new Error('Unexpected token ' + nexttoken);
+	// 		//advance();	
+	// 	}
+	// }
 	
 	factor();
 		
