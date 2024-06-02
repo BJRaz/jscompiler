@@ -11,9 +11,10 @@ function printDebug(str) {
 		console.log(str);
 }
 
-function scan(exppression, setdebug = false) {
+function scan(expression, setdebug = false) {
     debug = setdebug;
-    exp = exppression.replace(/\s/g, '');   // remove whitespace from expression   
+    i = 0;
+    exp = expression.replace(/\s/g, '');   // remove whitespace from expression   
     c = exp[i];                             // gets the first character from expression
 }
 

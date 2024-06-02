@@ -1,4 +1,4 @@
-const scanner = require('./js/scanner');
+const scanner = require('../js/scanner');
 
 function helper(tokenlist) {
     return tokenlist.map((e) => e.getValue() + ", ").join('');
@@ -24,6 +24,11 @@ test('scan 2+2', () => {
 test('scan .0+2', () => {
     let tokenlist = scanner.scan(".0+2");
     expect(helper(tokenlist)).toBe(".0, +, 2, ");
+});
+
+test('scan 2.0+2', () => {
+    let tokenlist = scanner.scan("2.0+2");
+    expect(helper(tokenlist)).toBe("2.0, +, 2, ");
 });
 
 test('scan -2+2', () => {
