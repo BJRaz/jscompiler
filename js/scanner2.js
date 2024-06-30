@@ -74,7 +74,15 @@ function nextToken() {
                         numberchars.push(c);    // push the operator to the numbers array
 
                     } else {
-                        token = (new types.Token(types.tTokens.OPERATOR, c));
+                        var type = types.tTokens.PLUSOPERATOR;
+                        if(c == '-')
+                            type = type = types.tTokens.MINUSOPERATOR;
+                        else if(c == '*')
+                            type = types.tTokens.TIMESOPERATOR;
+                        else if(c == '/')
+                            type = types.tTokens.DIVISIONOPERATOR;
+
+                        token = new types.Token(type, c);
                         c = exp.charAt(++i);
                         return token;
                     }
@@ -82,13 +90,13 @@ function nextToken() {
                 }
             case '(':
                 {
-                    token = (new types.Token(types.tTokens.PARASTART, c));
+                    token = (new types.Token(types.tTokens.LEFTP, c));
                     c = exp.charAt(++i);
                     return token;
                 }
             case ')':
                 {
-                    token = (new types.Token(types.tTokens.PARAEND, c));
+                    token = (new types.Token(types.tTokens.RIGHTP, c));
                     c = exp.charAt(++i);
                     return token;
                 }

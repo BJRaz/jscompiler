@@ -1,9 +1,17 @@
 
-const parser = require('../js/parser');
+const parser = require('../js/recursive_descent_parser');
 
 
 test('parse and evaluate 2+2', () => {
     expect(parser.parse("2+2")).toBe(4);
+});
+
+test('parse and evaluate 3*2+2', () => {
+    expect(parser.parse("3*2+2")).toBe(8);
+});
+
+test('parse and evaluate 2*2-1', () => {
+    expect(parser.parse("2*2-1")).toBe(3);
 });
 
 test('parse and evaluate 2-2', () => {

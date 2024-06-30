@@ -2,7 +2,7 @@ const types = require("./types");
 const scanner = require("./scanner2");
 const { tTokens } = require("./types");
 
-// This is faulty notation for some productions.
+// BNF:
 // 
 // statement 	::= 	expression 
 // expression	::= 	factor operator factor
@@ -10,6 +10,9 @@ const { tTokens } = require("./types");
 // num 			::= 	[+|-]{digit}.digit{digit}
 // operator		::=  	+ | - | * | /
 // digit		::= 	0 | ... | 9
+//
+// issue: This is faulty notation for some productions.
+// The parser (almost) handles infix notation, converts it to postfix, and calculates the result. 
 
 var stack = [];
 var operators = [];
@@ -64,11 +67,11 @@ function factor() {
 		stack.push(parseFloat(currentToken().getValue()));
 	}
 
-	if(match(types.tTokens.PARASTART))
+	if(match(types.tTokens.LEFTP))
 	{
 		advance();
 		expression();
-		if( ! match(types.tTokens.PARAEND))
+		if( ! match(types.tTokens.RIGHTP))
 			throw new Error('Unmatched "("');
 	}	
 	
