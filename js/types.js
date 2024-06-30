@@ -1,8 +1,11 @@
 const tTokens = {
 	'NUMBER': 1,
-	'OPERATOR': 2,
-	'PARASTART': 4,
-	'PARAEND': 8
+	'PLUSOPERATOR': 2,
+	'MINUSOPERATOR': 4,
+	'TIMESOPERATOR': 8,
+	'DIVISIONOPERATOR': 16,
+	'LEFTP': 32,
+	'RIGHTP': 64
 };
 
 class Token 

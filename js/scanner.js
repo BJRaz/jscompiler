@@ -109,12 +109,12 @@ function scan(exp, setdebug = false) {
                 }					
             case '(':
                 {
-                    tokens.push(new types.Token(types.tTokens.PARASTART, c)); 
+                    tokens.push(new types.Token(types.tTokens.LEFTP, c)); 
                     break;
                 } 
             case ')':
                 {
-                    tokens.push(new types.Token(types.tTokens.PARAEND, c)); 
+                    tokens.push(new types.Token(types.tTokens.RIGHTP, c)); 
                     break;
                 }
             default:
