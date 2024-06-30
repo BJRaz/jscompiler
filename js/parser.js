@@ -10,23 +10,24 @@ const { tTokens } = require("./types");
 
 var stack = [];
 
-var tokenlist = [];
+var tokenbuffer = [];
 
 var currentindex = 0;
-var next = null;
 var level = 0;
+var debug = false;
 
 function repeat(i) {
 	return Array(i + 1).join(' ');
 }
 
 function printDebug(str) {
-	console.log(`${repeat(level * 4)} ${str}`);
+	if(debug)
+		console.log(`${repeat(level * 4)} ${str}`);
 }
 
 function init() {
 	stack = [];
-	tokenlist = [];
+	tokenbuffer = [];
 	currentindex = 0;
 	next = null;
 }
@@ -50,8 +51,8 @@ function factor() {
 
 	if(currentToken().token() == tTokens.NUMBER) {
 		stack.push(currentToken().getValue());
-		
 	}
+
 	if(currentToken().token() == types.tTokens.PARASTART)
 	{
 		advance();
@@ -59,55 +60,56 @@ function factor() {
 		if(currentToken().token() != types.tTokens.PARAEND)
 			throw new Error('Unmatched "("');
 	}	
-	nextToken();
-	if(next != undefined) {
-		printDebug('Next token: ' + next.toString())
-		
+	
+	if(peekNextToken() != undefined) {
+		printDebug('Next token: ' + peekNextToken().toString())
 		advance();	
 	}
 	
 }
 
 function operator() {
-	var token = currentToken();
+	let token = currentToken();
+	
 	printDebug("Operator: " + token);
 	
 	advance();
+
 	if(currentToken().token() == types.tTokens.NUMBER)
 	{
-		nextToken();
-		if(next != undefined) {
-			printDebug('Next token: ' + next.toString())
-			if(next.tokentype != types.tTokens.PARAEND)
-				throw new Error('Unexpected token ' + next);
+		let nexttoken = peekNextToken();
+		if(nexttoken != undefined) {
+			printDebug('Next token: ' + nexttoken.toString())
+			if(nexttoken.tokentype != types.tTokens.PARAEND)
+				throw new Error('Unexpected token ' + nexttoken);
 			//advance();	
 		}
 	}
 	
 	factor();
 		
-	printDebug("Stack PRE operator: " + stack);
+	printDebug("Stack PRE operator: [" + stack + "]");
 
 	switch(token.getValue())
 	{
 		case '+':
-			//printDebug("PLUS");
+			printDebug("PLUS");
 			var op2 = parseFloat(stack.pop());
 			var op1 = parseFloat(stack.pop());
 			stack.push(op1 + op2);
 			break;
 		case '-':
-			//printDebug("MINUS");
+			printDebug("MINUS");
 			var op2 = stack.pop();
 			var op1 = stack.pop();
 			stack.push(op1 - op2);
 			break;
 		case '*':
-			//printDebug("MULTIPLY");
+			printDebug("MULTIPLY");
 			stack.push(stack.pop() * stack.pop());
 			break;
 		case '/':
-			//printDebug("DIVISION");
+			printDebug("DIVISION");
 			var divisor = stack.pop();
 			stack.push(stack.pop() / divisor);
 			break;
@@ -115,38 +117,46 @@ function operator() {
 			throw new Error("Unknown operator " + token.token());
 	}
 	
-	printDebug("Stack POST operator: " + stack);
+	printDebug("Stack POST operator: [" + stack + "]");
 	
 }
 
 // *******
 
-function nextToken() {
-	if(tokenlist.length == currentindex)
+/**
+ * Get the next token in buffer without advancing the internal bufferindex.
+ * @returns Token
+ */
+function peekNextToken() {
+	if(tokenbuffer.length == currentindex)
 		throw Error('Index out of bounds');
-	next = tokenlist[currentindex + 1];
+	return tokenbuffer[currentindex + 1];
 }
 
+/**
+ * Goto next token in buffer
+ */
 function advance() {
-	currenttoken = tokenlist[++currentindex];
+	currenttoken = tokenbuffer[++currentindex];
 }
 
+/**
+ * Get current token from buffer
+ * @returns Token
+ */
 function currentToken() {
-	return tokenlist[currentindex];
+	return tokenbuffer[currentindex];
 }
 
 
-function parseAndEvaluate(expression) {
-	init();
-	tokenlist = scanner.scan(expression);
+function parseAndEvaluate(expression, setdebug=false) {
+	debug = setdebug;
 	let str = [];
-	for(var i in tokenlist)
-		str[str.length] = tokenlist[i].getValue() + ", ";
+	init();
+	tokenbuffer = scanner.scan(expression, debug);
+	for(var i in tokenbuffer)
+		str[str.length] = tokenbuffer[i].getValue() + ", ";
 	str = str.join(' ');
-	
-	console.log("Tokens: " + str);
-
-
 	statement();
 	return (stack.pop());
 	

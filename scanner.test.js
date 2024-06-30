@@ -1,86 +1,71 @@
 const scanner = require('./js/scanner');
-const parser = require('./js/parser');
+
+function helper(tokenlist) {
+    return tokenlist.map((e) => e.getValue() + ", ").join('');
+}
+
+test('scan ..2+2', () => {
+    expect(() => scanner.scan("..2+2")).toThrow("Unaccepted character: '.', at index: 1");
+});
+
+test('scan -..1+2', () => {
+    expect(() => scanner.scan("-..1+2")).toThrow("Unaccepted character: '.', at index: 2");
+});
+
+test('scan 2+2..0', () => {
+    expect(() => scanner.scan("2+2..0")).toThrow("Unaccepted character: '.', at index: 4");
+});
+
+test('scan 2+2', () => {
+    let tokenlist = scanner.scan("2+2");
+    expect(helper(tokenlist)).toBe("2, +, 2, ");
+});
+
+test('scan .0+2', () => {
+    let tokenlist = scanner.scan(".0+2");
+    expect(helper(tokenlist)).toBe(".0, +, 2, ");
+});
 
 test('scan -2+2', () => {
-    let str = [];
-    let tokenlist = scanner.scan("2+2")
-    for(var i in tokenlist)
-        str[str.length] = tokenlist[i].getValue() + ", ";
-    str = str.join('');
-    expect(str).toBe("2, +, 2, ");
+    let tokenlist = scanner.scan("-2+2");
+    expect(helper(tokenlist)).toBe("-2, +, 2, ");
 });
 
 test('scan -2+(-2)', () => {
-    let str = [];
     let tokenlist = scanner.scan("-2+(-2)")
-    for(var i in tokenlist)
-        str[str.length] = tokenlist[i].getValue() + ", ";
-    str = str.join('');
-    expect(str).toBe("-2, +, (, -2, ), ");
+    expect(helper(tokenlist)).toBe("-2, +, (, -2, ), ");
 });
 
 test('scan (-2)+(2)', () => {
-    let str = [];
     let tokenlist = scanner.scan("(-2)+(2)")
-    for(var i in tokenlist)
-        str[str.length] = tokenlist[i].getValue() + ", ";
-    str = str.join('');
-    expect(str).toBe("(, -2, ), +, (, 2, ), ");
+    expect(helper(tokenlist)).toBe("(, -2, ), +, (, 2, ), ");
 });
 
 test('scan (-2)+(-2)', () => {
-    let str = [];
     let tokenlist = scanner.scan("(-2)+(-2)")
-    for(var i in tokenlist)
-        str[str.length] = tokenlist[i].getValue() + ", ";
-    str = str.join('');
-    expect(str).toBe("(, -2, ), +, (, -2, ), ");
+    expect(helper(tokenlist)).toBe("(, -2, ), +, (, -2, ), ");
 });
 
 test('scan -2*(-2/-100)-100', () => {
-    let str = [];
     let tokenlist = scanner.scan("-2*(-2/-100)-100")
-    for(var i in tokenlist)
-        str[str.length] = tokenlist[i].getValue() + ", ";
-    str = str.join('');
-    expect(str).toBe("-2, *, (, -2, /, -100, ), -, 100, ");
+    expect(helper(tokenlist)).toBe("-2, *, (, -2, /, -100, ), -, 100, ");
 });
 
 test('scan 5-(18/(9-3))', () => {
-    let str = [];
     let tokenlist = scanner.scan("5-(18/(9-3))")
-    for(var i in tokenlist)
-        str[str.length] = tokenlist[i].getValue() + ", ";
-    str = str.join('');
-    expect(str).toBe("5, -, (, 18, /, (, 9, -, 3, ), ), ");
+    expect(helper(tokenlist)).toBe("5, -, (, 18, /, (, 9, -, 3, ), ), ");
 });
 
-test('parse and evaluate 5-(18/(9-3))', () => {
-    let result = parser.parse("5-(18/(9-3))");
-    
-    expect(result).toBe(2);
+test('scan 1-a', () => {
+    expect(() => scanner.scan("1-a")).toThrow();
 });
 
-test('parse and evaluate 2*2', () => {
-    let result = parser.parse("2*(2*5)");
-    
-    expect(result).toBe(20);
+test('scan 2+(-10.5-4)', () => {
+    let tokenlist = scanner.scan("2+(-10.5-4)")
+    expect(helper(tokenlist)).toBe("2, +, (, -10.5, -, 4, ), ");
 });
 
-test('parse and evaluate (2*2)-1', () => {
-    let result = parser.parse("(2*2)-1");
-    
-    expect(result).toBe(3);
-});
-
-test('parse and evaluate 2*2-1', () => {
-    expect(() => {
-        parser.parse("2*2-1")
-    }).toThrow("Unexpected token '-' type: 2");
-});
-
-test('parse and evaluate 2*(2-1)', () => {
-    let result = parser.parse("2*(2-1)");
-    
-    expect(result).toBe(2);
+test('scan 2+(-10.5-4)', () => {
+    let tokenlist = scanner.scan("2+(-.5-4)")
+    expect(helper(tokenlist)).toBe("2, +, (, -.5, -, 4, ), ");
 });
