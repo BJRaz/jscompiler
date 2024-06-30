@@ -1,6 +1,6 @@
 {
   "name": "compilers",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "This is a small project for experimenting scanners, parsers, compilers, languages etc made in javascript",
   "main": "index.js",
   "scripts": {
