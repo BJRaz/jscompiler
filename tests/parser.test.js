@@ -68,14 +68,50 @@ test('parse and evaluate 5-(18/(9-3))', () => {
 
 // latests tests not working for current grammar.
 
-// test('parse and evaluate -3+4*21', () => {
-//     expect(parser.parse("-3+4*21")).toBe(81);
-// });
+test('parse and evaluate -3+4*21', () => {
+    expect(parser.parse("-3+4*21")).toBe(81);
+});
 
-// test('parse and evaluate -2+(4*10)/2', () => {
-//     expect(parser.parse("-2+(4*10)/2")).toBe(18);
-// });
+test('parse and evaluate -2+(4*10+3)/2', () => {
+    expect(parser.parse("-2+(4*10+3)/2")).toBe(19.5);
+});
 
-// test('parse and evaluate -2+(4*10+3)/2', () => {
-//     expect(parser.parse("-2+(4*10+3)/2")).toBe(18);
-// });
+test('parse and evaluate -2+(4*10)/2', () => {
+    expect(parser.parse("-2+(4*10)/2")).toBe(18);
+});
+
+test('parse and evaluate 2+3', () => {
+    expect(parser.parse("2+3")).toBe(5);
+});
+
+test('parse and evaluate 2-3', () => {
+    expect(parser.parse("2-3")).toBe(-1);
+});
+
+test('parse and evaluate 2-3+3', () => {
+    expect(parser.parse("2-3+3")).toBe(2);
+});
+
+test('parse and evaluate 2*2', () => {
+    expect(parser.parse("2*2")).toBe(4);
+});
+
+test('parse and evaluate 2/2', () => {
+    expect(parser.parse("2/2")).toBe(1);
+});
+
+test('parse and evaluate 1+2/2', () => {
+    expect(parser.parse("1+2/2")).toBe(2);
+});
+
+test('parse and evaluate 2*2-1', () => {
+    expect(parser.parse("2*2-1")).toBe(3);
+});
+
+test('parse and evaluate (2*2)-1', () => {
+    expect(parser.parse("(2*2)-1")).toBe(3);
+});
+
+test('parse and evaluate 4-(2*2)', () => {
+    expect(parser.parse("4-(2*2)")).toBe(0);
+});
