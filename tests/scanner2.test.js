@@ -21,17 +21,17 @@ test('scan 2+2', () => {
     expect(helper(scantokens("2+2"))).toBe("2, +, 2, ");
 });
 
-// test('scan ..2+2', () => {
-//     expect(() => scanner.scan("..2+2")).toThrow("Unaccepted character: '.', at index: 1");
-// });
+test('scan ..2+2', () => {
+    expect(() => scantokens("..2+2")).toThrow("Unaccepted character: '.', at index: 1");
+});
 
-// test('scan -..1+2', () => {
-//     expect(() => scanner.scan("-..1+2")).toThrow("Unaccepted character: '.', at index: 2");
-// });
+test('scan -..1+2', () => {
+    expect(() => scantokens("-..1+2")).toThrow("Unaccepted character: '.', at index: 2");
+});
 
-// test('scan 2+2..0', () => {
-//     expect(() => scanner.scan("2+2..0")).toThrow("Unaccepted character: '.', at index: 4");
-// });
+test('scan 2+2..0', () => {
+    expect(() => scantokens("2+2..0")).toThrow("Unaccepted character: '.', at index: 4");
+});
 
 test('scan 2+2', () => {
     expect(helper(scantokens("2+2"))).toBe("2, +, 2, ");
