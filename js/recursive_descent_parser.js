@@ -1,10 +1,11 @@
 // Recursive Descent Parser 
+// v.1.0
 // BJR  01-07-2024
 // Inspired from Allen Holubs book 'Compiler Design In C', chapter 1
 //
 // The BNF
 // 
-// statement 	    ::= 	expression 
+// statement 	    ::= 	expression ';' | expression ';' statement
 // expression	    ::= 	term expression_prime
 // expression_prime ::=     [+,/] term expression_prime | e
 // term             ::=     factor term_prime
@@ -20,6 +21,7 @@ const { tTokens } = require("./types");
 var stack = [];
 var currenttoken = null;
 var debug = false;
+var level = 0;
 
 
 function match(token) {
@@ -44,6 +46,8 @@ function currentToken() {
 function statement() {
     advance();
     expression();
+    if (match(tTokens.SEMI))
+        statement();
 }
 
 function expression() {
@@ -98,12 +102,11 @@ function factor() {
             throw new Error('Unmatched "("');
     } else
         throw new Error('Number or "(" expected...');
-
 }
 
 function doCalc(operator) {
     let temp = stack.pop();                         // pop the 'varaible' from the stack added in factor  
-                                                    // the varible is not needed anymore      
+    // the varible is not needed anymore      
     switch (operator) {
         case tTokens.TIMESOPERATOR:
             stack[stack.length - 1] *= temp;        // do the calculation and store result in stacks top 'variable'.
@@ -112,7 +115,7 @@ function doCalc(operator) {
             stack[stack.length - 1] /= temp;
             break;
         case tTokens.PLUSOPERATOR:
-            stack[stack.length - 1] += temp;      
+            stack[stack.length - 1] += temp;
             break;
         case tTokens.MINUSOPERATOR:
             stack[stack.length - 1] -= temp;
@@ -123,6 +126,7 @@ function doCalc(operator) {
 function init() {
     stack = [];
     currenttoken = null;
+    level = 0;
 }
 
 function parseAndEvaluate(expression, setdebug = false) {
@@ -130,8 +134,8 @@ function parseAndEvaluate(expression, setdebug = false) {
     init();
     scanner.scan(expression, debug);
     statement();
-    if(stack.length > 1)
-        throw new Error('Calculation failed - stack is invalid');
+    if (stack.length > 1)
+        return stack;
     return stack.pop();         // should hold one value - the final result
 }
 
@@ -141,7 +145,7 @@ function repeat(i) {
 
 function printDebug(str) {
     if (debug)
-        console.log(`${repeat(level * 4)} ${str}`);
+        console.log(`${repeat(level * 4)} ${str} (${level})`);
 }
 
 module.exports = {

@@ -82,3 +82,8 @@ test('scan 1-a', () => {
     expect(() => scantokens("1-a")).toThrow();
 });
 
+test('scan 2+2;2+2', () => {
+    scanner.scan("2+2;2+2")
+    expect(helper(scantokens("2+2;2+2"))).toBe("2, +, 2, ;, 2, +, 2, ")
+});
+
