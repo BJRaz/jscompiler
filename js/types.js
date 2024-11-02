@@ -1,4 +1,5 @@
 const tTokens = {
+	'SEMI': 0,
 	'NUMBER': 1,
 	'PLUSOPERATOR': 2,
 	'MINUSOPERATOR': 4,

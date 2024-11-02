@@ -1,16 +1,11 @@
-const types = require("./types");
-const scanner = require("./scanner2");
-const { tTokens } = require("./types");
-
-var stack = [];
-var operators = [];
-var currenttoken = null;
-
-var debug = false;
-
+// Recursive Descent Parser 
+// v.1.0
+// BJR  01-07-2024
+// Inspired from Allen Holubs book 'Compiler Design In C', chapter 1
+//
 // The BNF
 // 
-// statement 	    ::= 	expression 
+// statement 	    ::= 	expression ';' | expression ';' statement
 // expression	    ::= 	term expression_prime
 // expression_prime ::=     [+,/] term expression_prime | e
 // term             ::=     factor term_prime
@@ -20,15 +15,24 @@ var debug = false;
 // operator		    ::=  	+ | - | * | /
 // digit		    ::= 	0 | ... | 9
 
+const scanner = require("./scanner2");
+const { tTokens } = require("./types");
+
+var stack = [];
+var currenttoken = null;
+var debug = false;
+var level = 0;
+
+
 function match(token) {
-	return (currentToken() != null) ? currentToken().token() == token : false;
+    return (currentToken() != null) ? currentToken().token() == token : false;
 }
 
 /**
  * Goto next token in buffer
  */
 function advance() {
-	currenttoken = scanner.nextToken();
+    currenttoken = scanner.nextToken();
 }
 
 /**
@@ -36,12 +40,14 @@ function advance() {
  * @returns Token
  */
 function currentToken() {
-	return currenttoken;
+    return currenttoken;
 }
 
 function statement() {
     advance();
     expression();
+    if (match(tTokens.SEMI))
+        statement();
 }
 
 function expression() {
@@ -50,13 +56,17 @@ function expression() {
 }
 
 function expression_prime() {
-    if(match(types.tTokens.PLUSOPERATOR) || match(types.tTokens.MINUSOPERATOR)) {
-        operators.push(currentToken().getValue());
+    /*
+        expression_prime -> [+,-] term expression_prime | e
+    */
+    if (match(tTokens.PLUSOPERATOR) || match(tTokens.MINUSOPERATOR)) {
+        var operator = currentToken().token();      // get the operator
         advance();
         term();
+        doCalc(operator);
         expression_prime();
-        doCalc();
     }
+    /* epsilon */
 }
 
 function term() {
@@ -65,94 +75,79 @@ function term() {
 }
 
 function term_prime() {
-    if(match(types.tTokens.TIMESOPERATOR) || match(types.tTokens.DIVISIONOPERATOR)) {
-        operators.push(currentToken().getValue());
+    /*
+        term_prime -> [*,/] factor term_prime | e
+    */
+    if (match(tTokens.TIMESOPERATOR) || match(tTokens.DIVISIONOPERATOR)) {
+        let operator = currentToken().token();      // get the operator
         advance();
         factor();
+        doCalc(operator);                           // must be called post call to factor()
         term_prime();
-        doCalc();
     }
+    /* epsilon */
 }
 
 function factor() {
-    if(match(tTokens.NUMBER)) {
-		stack.push(parseFloat(currentToken().getValue()));
+    if (match(tTokens.NUMBER)) {
+        stack.push(parseFloat(currentToken().getValue()));
         advance();
-	}
-    else if(match(types.tTokens.LEFTP))
-    {
+    }
+    else if (match(tTokens.LEFTP)) {
         advance();
         expression();
-        if(match(types.tTokens.RIGHTP))
+        if (match(tTokens.RIGHTP))
             advance();
         else
             throw new Error('Unmatched "("');
-        doCalc();
     } else
-        throw new Error('Number exprected...');
-    
+        throw new Error('Number or "(" expected...');
+}
+
+function doCalc(operator) {
+    let temp = stack.pop();                         // pop the 'varaible' from the stack added in factor  
+    // the varible is not needed anymore      
+    switch (operator) {
+        case tTokens.TIMESOPERATOR:
+            stack[stack.length - 1] *= temp;        // do the calculation and store result in stacks top 'variable'.
+            break;
+        case tTokens.DIVISIONOPERATOR:
+            stack[stack.length - 1] /= temp;
+            break;
+        case tTokens.PLUSOPERATOR:
+            stack[stack.length - 1] += temp;
+            break;
+        case tTokens.MINUSOPERATOR:
+            stack[stack.length - 1] -= temp;
+            break;
+    }
 }
 
 function init() {
-	stack = [];
-	tokenbuffer = [];
-	currentindex = 0;
-	next = null;
+    stack = [];
+    currenttoken = null;
+    level = 0;
 }
 
-function parseAndEvaluate(expression, setdebug=false) {
-	debug = setdebug;
+function parseAndEvaluate(expression, setdebug = false) {
+    debug = setdebug;
     init();
-	scanner.scan(expression, debug);
-	statement();
-    
-	return (stack.pop());
+    scanner.scan(expression, debug);
+    statement();
+    if (stack.length > 1)
+        return stack;
+    return stack.pop();         // should hold one value - the final result
 }
-
-// semantic function 
-function doCalc() {
-    if(operators.length == 0)
-        return;
-	let theoperator = operators.pop();
-    switch(theoperator)
-    {
-        case '+':
-            printDebug("PLUS");
-            var op2 = stack.pop();
-            var op1 = stack.pop();
-            stack.push(op1 + op2);
-            break;
-        case '-':
-            printDebug("MINUS");
-            var op2 = stack.pop();
-            var op1 = stack.pop();
-            stack.push(op1 - op2);
-            break;
-        case '*':
-            printDebug("MULTIPLY");
-            stack.push(stack.pop() * stack.pop());
-            break;
-        case '/':
-            printDebug("DIVISION");
-            var divisor = stack.pop();
-            stack.push(stack.pop() / divisor);
-            break;
-        default:
-            throw new Error("Unknown operator " + theoperator.token());
-    }
-	printDebug("Stack POST operator: [" + stack + "]");
-}
-
 
 function repeat(i) {
-	return Array(i + 1).join(' ');
+    return Array(i + 1).join(' ');
 }
 
 function printDebug(str) {
-	if(debug)
-		console.log(`${repeat(level * 4)} ${str}`);
+    if (debug)
+        console.log(`${repeat(level * 4)} ${str} (${level})`);
 }
 
 module.exports = {
-	parse: parseAndEvaluate
+    parse: parseAndEvaluate
 };

@@ -100,6 +100,12 @@ function nextToken() {
                     c = exp.charAt(++i);
                     return token;
                 }
+            case ';':
+                {
+                    token = (new types.Token(types.tTokens.SEMI, c));
+                    c = exp.charAt(++i);
+                    return token;
+                }
             default:
                 throw new Error("Unaccepted character: '" + c + "', at index: " + i + " " + exp.charAt(i));
         }
