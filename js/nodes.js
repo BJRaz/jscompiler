@@ -1,3 +1,6 @@
+var level = 0;
+var debug = true;
+
 var Node = function(value) {
     let _value = value;
     
@@ -25,6 +28,36 @@ var Node = function(value) {
     }
 }
 
+function evaluate(node) {
+    var l, r;
+    if (node.getLeft())
+        l = evaluate(node.getLeft());
+    if (node.getRight())
+        r = evaluate(node.getRight());
+    var v = node.getValue();
+    switch (v) {
+        case '+':
+            {
+                return l + r;
+            }
+        case '-':
+            {
+                return l - r;
+            }
+        case '*':
+            {
+                return l * r;
+            }
+        case '/':
+            {
+                return l / r;
+            }
+    }
+    return v;
+}
+
+
 module.exports = {
-    Node: Node
+    Node: Node,
+    evaluate: evaluate
 }

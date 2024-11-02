@@ -17,12 +17,9 @@
 
 const scanner = require("./scanner2");
 const { tTokens } = require("./types");
+const nodes = require('./nodes');
 
-var stack = [];
 var currenttoken = null;
-var debug = false;
-var level = 0;
-
 
 function match(token) {
     return (currentToken() != null) ? currentToken().token() == token : false;
@@ -45,82 +42,52 @@ function currentToken() {
 
 function statement() {
     advance();
-    expression();
-    if (match(tTokens.SEMI))
-        statement();
+    let node = expression();
+    // if (match(tTokens.SEMI))
+    //     statement();
+    return node;
 }
 
 function expression() {
-    term();
-    expression_prime();
-}
-
-function expression_prime() {
-    /*
-        expression_prime -> [+,-] term expression_prime | e
-    */
-    if (match(tTokens.PLUSOPERATOR) || match(tTokens.MINUSOPERATOR)) {
-        var operator = currentToken().token();      // get the operator
+    let l_node = term();
+    while (match(tTokens.PLUSOPERATOR) || match(tTokens.MINUSOPERATOR)) {
+        const subtree = new nodes.Node(currentToken().getValue());
         advance();
-        term();
-        doCalc(operator);
-        expression_prime();
+        subtree.setLeft(l_node);
+        subtree.setRight(term());
+        l_node = subtree;
     }
-    /* epsilon */
+    return l_node;
 }
 
 function term() {
-    factor();
-    term_prime();
-}
-
-function term_prime() {
-    /*
-        term_prime -> [*,/] factor term_prime | e
-    */
-    if (match(tTokens.TIMESOPERATOR) || match(tTokens.DIVISIONOPERATOR)) {
-        let operator = currentToken().token();      // get the operator
+    let l_node = factor();
+    while (match(tTokens.TIMESOPERATOR) || match(tTokens.DIVISIONOPERATOR)) {
+        const subtree = new nodes.Node(currentToken().getValue());
         advance();
-        factor();
-        doCalc(operator);                           // must be called post call to factor()
-        term_prime();
+        subtree.setLeft(l_node);
+        subtree.setRight(factor());
+        l_node = subtree; 
     }
-    /* epsilon */
+    return l_node;
 }
 
 function factor() {
     if (match(tTokens.NUMBER)) {
-        stack.push(parseFloat(currentToken().getValue()));
+        let value = parseFloat(currentToken().getValue());
         advance();
+        return new nodes.Node(value);
     }
     else if (match(tTokens.LEFTP)) {
         advance();
-        expression();
+        const node = expression();
         if (match(tTokens.RIGHTP))
             advance();
         else
             throw new Error('Unmatched "("');
+        return node;
     } else
         throw new Error('Number or "(" expected...');
-}
-
-function doCalc(operator) {
-    let temp = stack.pop();                         // pop the 'varaible' from the stack added in factor  
-    // the varible is not needed anymore      
-    switch (operator) {
-        case tTokens.TIMESOPERATOR:
-            stack[stack.length - 1] *= temp;        // do the calculation and store result in stacks top 'variable'.
-            break;
-        case tTokens.DIVISIONOPERATOR:
-            stack[stack.length - 1] /= temp;
-            break;
-        case tTokens.PLUSOPERATOR:
-            stack[stack.length - 1] += temp;
-            break;
-        case tTokens.MINUSOPERATOR:
-            stack[stack.length - 1] -= temp;
-            break;
-    }
 }
 
 function init() {
@@ -133,11 +100,12 @@ function parseAndEvaluate(expression, setdebug = false) {
     debug = setdebug;
     init();
     scanner.scan(expression, debug);
-    statement();
-    if (stack.length > 1)
-        return stack;
-    return stack.pop();         // should hold one value - the final result
+    const node = statement();
+    // if (stack.length > 1)
+    //     return stack;
+    return nodes.evaluate(node);    //stack.pop();         // should hold one value - the final result
 }
+
 
 function repeat(i) {
     return Array(i + 1).join(' ');

@@ -3,7 +3,7 @@ const parser = require("./js/parser");
 const rdp = require('./js/recursive_descent_parser');
 
 function main() {
-    let expression = "10-10*10"; //"-2*(-2/-100)-100";
+    let expression = "-2*(-2/-100)-100";
 
     // scanner.scan(expression, true);
     // // let token = null;
@@ -13,7 +13,7 @@ function main() {
     // var result = parser.parse(expression, true);
     // console.log("Result: " + result);
 
-    console.log("Result RDP " + expression + "=" + rdp.parse(expression, true));
+    console.log("Result Recursive Descent Parser: " + expression + "=" + rdp.parse(expression, true));
 
 }
 
